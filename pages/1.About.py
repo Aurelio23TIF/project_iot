@@ -2,7 +2,7 @@ import streamlit as st
 
 st.set_page_config(page_title="Analisis Clustering Kualitas Udara dan Evaluasi Risiko Kesehatan Berbasis Standar WHO pada Data Sensor IoT", page_icon="")
 
-st.title("💡 Tentang Proyek: Big Data Pipeline untuk Kualitas Udara")
+st.title("Analisis Clustering Kualitas Udara dan Evaluasi Risiko Kesehatan Berbasis Standar WHO pada Data Sensor IoT")
 st.markdown("---")
 
 # ==============================================================================
