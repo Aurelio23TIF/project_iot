@@ -74,7 +74,6 @@ def process_iot_data(data_list):
 # Bagaimana data di atas dipetakan ke Grafik Streamlit/Plotly?
 
 """
-TENTANG DATA:
 
 # --- METADATA (Identitas) ---
     "_id": "693d02ae67adc5b89e184193",  # Tipe: String (ObjectId). ID Unik dari MongoDB. 
