@@ -78,10 +78,8 @@ TENTANG DATA:
 
 # --- METADATA (Identitas) ---
     "_id": "693d02ae67adc5b89e184193",  # Tipe: String (ObjectId). ID Unik dari MongoDB. 
-                                        # ACTION: Biasanya di-drop di dashboard karena tidak visual.
     
     "device": "ESP8266-Sensors",        # Tipe: String. Nama perangkat pengirim.
-                                        # ACTION: Berguna untuk filter jika punya banyak alat.
 
     "timestamp": "2025-12-13|06:07:35", # Tipe: String. Waktu pengambilan data.
                                         # MASALAH: Menggunakan simbol '|' (pipa) sebagai pemisah.

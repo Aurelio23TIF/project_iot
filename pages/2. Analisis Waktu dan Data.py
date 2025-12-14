@@ -11,8 +11,6 @@ def load_data():
     df = pd.read_csv('DataFix_IOT_BigData.datasensor.csv')
     
     # PEMBERSIHAN TIMESTAMP (CRITICAL STEP)
-    # Format Asli: "2025-12-13|06:07:35" -> Ada tanda pipa '|'
-    # Kita ganti '|' dengan spasi ' ' agar jadi format datetime standar
     df['timestamp'] = df['timestamp'].astype(str).str.replace('|', ' ')
     df['timestamp'] = pd.to_datetime(df['timestamp'])
     
@@ -21,33 +19,54 @@ def load_data():
     df['tanggal'] = df['timestamp'].dt.date
     df['hari_nama'] = df['timestamp'].dt.day_name()
     
+    # Pastikan kolom numerik (diperlukan untuk selectbox dinamis)
+    num_cols = ['temperature', 'humidity', 'NH3', 'CO', 'NO2', 'CO2']
+    for col in num_cols:
+        if col in df.columns:
+            df[col] = pd.to_numeric(df[col], errors='coerce')
+    
     return df.sort_values('timestamp')
 
 df = load_data()
 
-st.title("⏳ Analisis Timestamp & Tren Waktu")
+st.title("⏳ Analisis Waktu")
 st.write(f"Total Data: **{len(df)}** baris | Rentang Waktu: **{df['timestamp'].min()}** s/d **{df['timestamp'].max()}**")
 
 # --- 2. PILIHAN VISUALISASI ---
 tab1, tab2 = st.tabs(["📈 Tren Sensor (Time Series)", "📊 Volume Data per Jam"])
 
-# --- TAB 1: TIME SERIES (Standar IoT) ---
+# --- TAB 1: TIME SERIES (DENGAN DROPDOWN) ---
 with tab1:
-    st.subheader("Tren Suhu Seiring Waktu")
+    st.subheader("Tren Sensor Seiring Waktu")
+    st.write("")
+
+    # --- PERUBAHAN UTAMA 1: Tambahkan semua sensor ke options ---
+    sensor_options = ['temperature', 'humidity'] 
     
-    # Downsample data jika terlalu banyak (biar tidak berat)
-    # Ambil 1 data setiap 5 baris
+    # Memilih lebih dari satu variabel (multiselect)
+    selected_vars = st.multiselect(
+        "",
+        options=sensor_options,
+        default=['temperature', 'humidity'] # Default saat pertama kali dibuka
+    )
+    
+    # Downsample data jika terlalu banyak (mengambil 1 data setiap 5 baris)
     df_chart = df.iloc[::5, :] 
     
-    fig = px.line(
-        df_chart, 
-        x='timestamp', 
-        y='temperature',
-        title="Fluktuasi Suhu (Time Series)",
-        template="plotly_dark",
-        color_discrete_sequence=['#00CC96']
-    )
-    st.plotly_chart(fig, use_container_width=True)
+    if selected_vars:
+        
+        fig = px.line(
+            df_chart, 
+            x='timestamp', 
+            # Menggunakan variabel yang dipilih pengguna
+            y=selected_vars, 
+            title=f"Fluktuasi {', '.join(selected_vars)} (Time Series)",
+            template="plotly_dark"
+        )
+        fig.update_layout(legend_title="Parameter") 
+        st.plotly_chart(fig, use_container_width=True)
+    # --- PERUBAHAN UTAMA 2: Blok 'else' dihilangkan ---
+
 
 # --- TAB 2: HISTOGRAM (Kapan sensor paling aktif?) ---
 with tab2:
