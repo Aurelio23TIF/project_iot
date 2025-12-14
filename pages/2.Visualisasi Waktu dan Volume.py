@@ -1,0 +1,69 @@
+import streamlit as st
+import pandas as pd
+import plotly.express as px
+
+st.set_page_config(page_title="Visualisasi Timestamp", layout="wide")
+
+# --- 1. LOAD & CLEAN DATA ---
+@st.cache_data
+def load_data():
+    # Ganti nama file sesuai file Anda di VS Code
+    df = pd.read_csv('DataFix_IOT_BigData.datasensor.csv')
+    
+    # PEMBERSIHAN TIMESTAMP (CRITICAL STEP)
+    # Format Asli: "2025-12-13|06:07:35" -> Ada tanda pipa '|'
+    # Kita ganti '|' dengan spasi ' ' agar jadi format datetime standar
+    df['timestamp'] = df['timestamp'].astype(str).str.replace('|', ' ')
+    df['timestamp'] = pd.to_datetime(df['timestamp'])
+    
+    # Ekstrak komponen waktu untuk analisis
+    df['jam'] = df['timestamp'].dt.hour
+    df['tanggal'] = df['timestamp'].dt.date
+    df['hari_nama'] = df['timestamp'].dt.day_name()
+    
+    return df.sort_values('timestamp')
+
+df = load_data()
+
+st.title("⏳ Analisis Timestamp & Tren Waktu")
+st.write(f"Total Data: **{len(df)}** baris | Rentang Waktu: **{df['timestamp'].min()}** s/d **{df['timestamp'].max()}**")
+
+# --- 2. PILIHAN VISUALISASI ---
+tab1, tab2 = st.tabs(["📈 Tren Sensor (Time Series)", "📊 Volume Data per Jam"])
+
+# --- TAB 1: TIME SERIES (Standar IoT) ---
+with tab1:
+    st.subheader("Tren Suhu Seiring Waktu")
+    
+    # Downsample data jika terlalu banyak (biar tidak berat)
+    # Ambil 1 data setiap 5 baris
+    df_chart = df.iloc[::5, :] 
+    
+    fig = px.line(
+        df_chart, 
+        x='timestamp', 
+        y='temperature',
+        title="Fluktuasi Suhu (Time Series)",
+        template="plotly_dark",
+        color_discrete_sequence=['#00CC96']
+    )
+    st.plotly_chart(fig, use_container_width=True)
+
+# --- TAB 2: HISTOGRAM (Kapan sensor paling aktif?) ---
+with tab2:
+    st.subheader("Jumlah Data Masuk per Jam")
+    
+    # Hitung jumlah data per jam
+    df_per_jam = df.groupby('jam').size().reset_index(name='jumlah_data')
+    
+    fig = px.bar(
+        df_per_jam,
+        x='jam',
+        y='jumlah_data',
+        title="Distribusi Data Berdasarkan Jam (0-23)",
+        template="plotly_dark",
+        color='jumlah_data',
+        color_continuous_scale='Viridis'
+    )
+    fig.update_layout(xaxis=dict(tickmode='linear', dtick=1)) # Tampilkan semua angka jam
+    st.plotly_chart(fig, use_container_width=True)

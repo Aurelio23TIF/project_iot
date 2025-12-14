@@ -12,8 +12,8 @@ st.set_page_config(page_title="Distribusi Data", page_icon="📊", layout="wide"
 
 # --- SIDEBAR KHUSUS HALAMAN INI ---
 with st.sidebar:
-    st.header("⚙️ Pengaturan Dashboard")
-    limit = st.selectbox("Jumlah Data:", [50, 100, 500, "Semua Data"], index=1)
+    st.header("Isi Jumlah Data")
+    limit = st.selectbox("Jumlah Data:", [50, 100, 500, "Semua Data"], index=0)
     limit_val = 0 if limit == "Semua Data" else limit
     auto_refresh = st.toggle("🔴 Live Auto-Refresh", value=False)
 
